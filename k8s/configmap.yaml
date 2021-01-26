@@ -5,4 +5,4 @@ metadata:
 data:
   THIS_SERVICE: $SERVICE_NAME
   BRANCH: $NAMESPACE
-  DOMAIN: http://schulcloud-server
+  domain: schulcloud-server
