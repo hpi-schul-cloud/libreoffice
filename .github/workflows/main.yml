@@ -19,7 +19,7 @@ on:
 # Environment variables available to all jobs and steps in this workflow
 env:
   GITHUB_SHA: ${{ github.sha }}
-  #REGISTRY_HOSTNAME: hub.docker.com
+  REGISTRY_HOSTNAME: gcr.io
   DEPLOYMENT_NAME: gke-test
   STAGING_DOMAIN: devops-wizard.com
   HOSTNAME_PREFIX: libreoffice
@@ -37,7 +37,7 @@ jobs:
         export SERVICE_NAME=${GITHUB_REPOSITORY##*/}
         export HOSTNAME=$HOSTNAME_PREFIX-$NAMESPACE.$STAGING_DOMAIN
 
-        export BUILD_IMAGE=collabora/code:latest
+        export BUILD_IMAGE=$REGISTRY_HOSTNAME/${{ secrets.GCP_PROJECT_ID }}/$SERVICE_NAME:$SHORT_SHA
         
         echo "SHORT_SHA=$SHORT_SHA"
         echo "SERVICE_NAME=$SERVICE_NAME"
@@ -76,6 +76,17 @@ jobs:
         # Set up docker to authenticate
         # via gcloud command-line tool.
         gcloud auth configure-docker
+
+     # Build the Docker image
+    - name: Build
+      run: |        
+        docker build -t $BUILD_IMAGE \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" \
+          --build-arg GITHUB_REF="$GITHUB_REF" .
+    # Push the Docker image to Google Container Registry
+    - name: Publish
+      run: |
+        docker push $BUILD_IMAGE
         
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
