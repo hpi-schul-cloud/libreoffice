@@ -21,3 +21,7 @@ items:
             serviceName: $SERVICE_NAME
             servicePort: 80
           path: /
+        - backend:
+            serviceName: $SERVICE_NAME
+            servicePort: 443
+          path: /
