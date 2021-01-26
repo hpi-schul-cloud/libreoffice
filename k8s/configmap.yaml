@@ -7,3 +7,5 @@ data:
   BRANCH: $NAMESPACE
   domain: schulcloud-server
   TZ: Europe/Berlin
+  DONT_GEN_SSL_CERT: "true"
+  extra_params: --o:ssl.enable=false
