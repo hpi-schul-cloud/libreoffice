@@ -5,7 +5,7 @@ metadata:
 data:
   THIS_SERVICE: $SERVICE_NAME
   BRANCH: $NAMESPACE
-  domain: schulcloud-server
+  domain: api-$HOSTNAME_ESCAPED
   TZ: Europe/Berlin
   DONT_GEN_SSL_CERT: "true"
   extra_params: --o:ssl.enable=false

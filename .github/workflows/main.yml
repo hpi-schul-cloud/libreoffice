@@ -36,6 +36,7 @@ jobs:
         export NAMESPACE=$(echo ${GITHUB_REF##*/} | sed -e "s/\//-/g" | tr '[:upper:]' '[:lower:]')
         export SERVICE_NAME=${GITHUB_REPOSITORY##*/}
         export HOSTNAME=$HOSTNAME_PREFIX-$NAMESPACE.$STAGING_DOMAIN
+        export $HOSTNAME_ESCAPED=${echo ${HOSTNAME} | sed -e "s/\./\\./g"}
 
         export BUILD_IMAGE=$REGISTRY_HOSTNAME/${{ secrets.GCP_PROJECT_ID }}/$SERVICE_NAME:$SHORT_SHA
         
@@ -43,6 +44,7 @@ jobs:
         echo "SERVICE_NAME=$SERVICE_NAME"
         echo "NAMESPACE=$NAMESPACE"
         echo "HOSTNAME=$HOSTNAME"
+        echo "HOSTNAME_ESCAPED=$HOSTNAME_ESCAPED"
         echo "STAGING_DOMAIN=$STAGING_DOMAIN"
         echo "BUILD_IMAGE=$BUILD_IMAGE"
         
@@ -51,6 +53,7 @@ jobs:
         echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
         echo "BUILD_IMAGE=$BUILD_IMAGE" >> $GITHUB_ENV
         echo "HOSTNAME=$HOSTNAME" >> $GITHUB_ENV
+        echo "HOSTNAME_ESCAPED=$HOSTNAME_ESCAPED" >> $GITHUB_ENV
         echo "STAGING_DOMAIN=$STAGING_DOMAIN" >> $GITHUB_ENV
 
     - name: Checkout
