@@ -37,7 +37,7 @@ jobs:
         export SERVICE_NAME=${GITHUB_REPOSITORY##*/}
         export HOSTNAME=$HOSTNAME_PREFIX-$NAMESPACE.$STAGING_DOMAIN
         export HOSTNAME_ESCAPED="$(echo $NAMESPACE.$STAGING_DOMAIN | sed -e "s/\./\\\./g" | sed -e "s/\./\\\./g")"
-
+        export CERT_NAME=wildcard-${STAGING_DOMAIN/./-}
         export BUILD_IMAGE=$REGISTRY_HOSTNAME/${{ secrets.GCP_PROJECT_ID }}/$SERVICE_NAME:$SHORT_SHA
         
         echo "SHORT_SHA=$SHORT_SHA"
@@ -46,11 +46,13 @@ jobs:
         echo "HOSTNAME=$HOSTNAME"
         echo "HOSTNAME_ESCAPED=$HOSTNAME_ESCAPED"
         echo "STAGING_DOMAIN=$STAGING_DOMAIN"
+        echo "CERT_NAME=$CERT_NAME"
         echo "BUILD_IMAGE=$BUILD_IMAGE"
         
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "SERVICE_NAME=$SERVICE_NAME" >> $GITHUB_ENV
         echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+        echo "CERT_NAME=$CERT_NAME" >> $GITHUB_ENV
         echo "BUILD_IMAGE=$BUILD_IMAGE" >> $GITHUB_ENV
         echo "HOSTNAME=$HOSTNAME" >> $GITHUB_ENV
         echo "HOSTNAME_ESCAPED=$HOSTNAME_ESCAPED" >> $GITHUB_ENV
@@ -107,4 +109,9 @@ jobs:
         cat k8s/service.yaml | envsubst | kubectl apply -n $NAMESPACE -f -
         cat k8s/ingress.yaml | envsubst
         cat k8s/ingress.yaml | envsubst | kubectl apply -n $NAMESPACE -f -
+
+        kubectl get secret $CERT_NAME -o json \
+        | jq 'del(.metadata["namespace","creationTimestamp","resourceVersion","selfLink","uid"])' \
+        | kubectl apply -n $NAMESPACE -f -
+
         kubectl rollout status deployment/$SERVICE_NAME -n $NAMESPACE
